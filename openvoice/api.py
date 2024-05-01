@@ -2,8 +2,8 @@ import torch
 import numpy as np
 import re
 import soundfile
-from utils import get_hparams_from_file, split_sentence, string_to_bits, bits_to_string
-from commons import intersperse
+from .utils import get_hparams_from_file, split_sentence, string_to_bits, bits_to_string
+from .commons import intersperse
 import os
 import librosa
 from text import text_to_sequence
