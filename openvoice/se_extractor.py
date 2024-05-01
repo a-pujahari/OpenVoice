@@ -1,9 +1,4 @@
 import os
-import glob
-import torch
-import hashlib
-import librosa
-import base64
 from glob import glob
 import numpy as np
 from pydub import AudioSegment
@@ -12,6 +7,7 @@ import hashlib
 import base64
 import librosa
 from whisper_timestamped.transcribe import get_audio_tensor, get_vad_segments
+import torch
 
 model_size = "medium"
 # Run on GPU with FP16
