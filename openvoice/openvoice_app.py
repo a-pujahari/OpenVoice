@@ -4,8 +4,8 @@ import argparse
 import gradio as gr
 from zipfile import ZipFile
 import langid
-from .se_extractor import get_se
-from .api import BaseSpeakerTTS, ToneColorConverter
+from se_extractor import get_se
+from api import BaseSpeakerTTS, ToneColorConverter
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--share", action='store_true', default=False, help="make link public")
