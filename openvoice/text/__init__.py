@@ -1,6 +1,6 @@
 """ from https://github.com/keithito/tacotron """
-from openvoice.text import cleaners
-from openvoice.text.symbols import symbols
+from text import cleaners
+from symbols import symbols
 
 
 # Mappings from symbol to numeric ID and vice versa:
