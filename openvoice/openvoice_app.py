@@ -4,8 +4,8 @@ import argparse
 import gradio as gr
 from zipfile import ZipFile
 import langid
-from openvoice import se_extractor
-from openvoice.api import BaseSpeakerTTS, ToneColorConverter
+from se_extractor import get_se
+from api import BaseSpeakerTTS, ToneColorConverter
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--share", action='store_true', default=False, help="make link public")
@@ -115,7 +115,7 @@ def predict(prompt, style, audio_file_pth, agree):
     
     # note diffusion_conditioning not used on hifigan (default mode), it will be empty but need to pass it to model.inference
     try:
-        target_se, audio_name = se_extractor.get_se(speaker_wav, tone_color_converter, target_dir='processed', vad=True)
+        target_se, audio_name = get_se(speaker_wav, tone_color_converter, target_dir='processed', vad=True)
     except Exception as e:
         text_hint += f"[ERROR] Get target tone color error {str(e)} \n"
         gr.Warning(
