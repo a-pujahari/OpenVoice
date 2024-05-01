@@ -124,7 +124,7 @@ class ToneColorConverter(OpenVoiceBaseClass):
             y = torch.FloatTensor(audio_ref)
             y = y.to(device)
             y = y.unsqueeze(0)
-            y = (y, hps.data.filter_length, hps.data.sampling_rate, hps.data.hop_length, hps.data.win_length, center=False).to(device)
+            y = spectrogram_torch(y, hps.data.filter_length, hps.data.sampling_rate, hps.data.hop_length, hps.data.win_length, center=False).to(device)
             with torch.no_grad():
                 g = self.model.ref_enc(y.transpose(1, 2)).unsqueeze(-1)
                 gs.append(g.detach())
@@ -145,7 +145,7 @@ class ToneColorConverter(OpenVoiceBaseClass):
         with torch.no_grad():
             y = torch.FloatTensor(audio).to(self.device)
             y = y.unsqueeze(0)
-            spec = (y, hps.data.filter_length,
+            spec = spectrogram_torch(y, hps.data.filter_length,
                                     hps.data.sampling_rate, hps.data.hop_length, hps.data.win_length,
                                     center=False).to(self.device)
             spec_lengths = torch.LongTensor([spec.size(-1)]).to(self.device)
