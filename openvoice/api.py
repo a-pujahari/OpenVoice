@@ -2,13 +2,13 @@ import torch
 import numpy as np
 import re
 import soundfile
-from openvoice import utils
-from openvoice import commons
+from utils import get_hparams_from_file, split_sentence, string_to_bits, bits_to_string
+from commons import intersperse
 import os
 import librosa
-from openvoice.text import text_to_sequence
-from openvoice.mel_processing import spectrogram_torch
-from openvoice.models import SynthesizerTrn
+from text import text_to_sequence
+from mel_processing import spectrogram_torch
+from models import SynthesizerTrn
 
 
 class OpenVoiceBaseClass(object):
@@ -18,7 +18,7 @@ class OpenVoiceBaseClass(object):
         if 'cuda' in device:
             assert torch.cuda.is_available()
 
-        hps = utils.get_hparams_from_file(config_path)
+        hps = get_hparams_from_file(config_path)
 
         model = SynthesizerTrn(
             len(getattr(hps, 'symbols', [])),
@@ -49,7 +49,7 @@ class BaseSpeakerTTS(OpenVoiceBaseClass):
     def get_text(text, hps, is_symbol):
         text_norm = text_to_sequence(text, hps.symbols, [] if is_symbol else hps.data.text_cleaners)
         if hps.data.add_blank:
-            text_norm = commons.intersperse(text_norm, 0)
+            text_norm = intersperse(text_norm, 0)
         text_norm = torch.LongTensor(text_norm)
         return text_norm
 
@@ -64,7 +64,7 @@ class BaseSpeakerTTS(OpenVoiceBaseClass):
 
     @staticmethod
     def split_sentences_into_pieces(text, language_str):
-        texts = utils.split_sentence(text, language_str=language_str)
+        texts = split_sentence(text, language_str=language_str)
         print(" > Text splitted to sentences.")
         print('\n'.join(texts))
         print(" > ===========================")
@@ -124,7 +124,7 @@ class ToneColorConverter(OpenVoiceBaseClass):
             y = torch.FloatTensor(audio_ref)
             y = y.to(device)
             y = y.unsqueeze(0)
-            y = spectrogram_torch(y, hps.data.filter_length,
+            y = (y, hps.data.filter_length,
                                         hps.data.sampling_rate, hps.data.hop_length, hps.data.win_length,
                                         center=False).to(device)
             with torch.no_grad():
@@ -147,7 +147,7 @@ class ToneColorConverter(OpenVoiceBaseClass):
         with torch.no_grad():
             y = torch.FloatTensor(audio).to(self.device)
             y = y.unsqueeze(0)
-            spec = spectrogram_torch(y, hps.data.filter_length,
+            spec = (y, hps.data.filter_length,
                                     hps.data.sampling_rate, hps.data.hop_length, hps.data.win_length,
                                     center=False).to(self.device)
             spec_lengths = torch.LongTensor([spec.size(-1)]).to(self.device)
@@ -163,7 +163,7 @@ class ToneColorConverter(OpenVoiceBaseClass):
         if self.watermark_model is None:
             return audio
         device = self.device
-        bits = utils.string_to_bits(message).reshape(-1)
+        bits = string_to_bits(message).reshape(-1)
         n_repeat = len(bits) // 32
 
         K = 16000
@@ -197,6 +197,6 @@ class ToneColorConverter(OpenVoiceBaseClass):
                 message_decoded_npy = (self.watermark_model.decode(signal) >= 0.5).int().detach().cpu().numpy().squeeze()
             bits.append(message_decoded_npy)
         bits = np.stack(bits).reshape(-1, 8)
-        message = utils.bits_to_string(bits)
+        message = bits_to_string(bits)
         return message
     
